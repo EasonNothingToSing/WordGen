@@ -1,11 +1,15 @@
 import xlrd
+from xlutils.copy import copy
 import logging
 import json
 import os
+import re
+import random
 
-__all__ = ["wordgen_excel2json", "wordgen_remodel_json"]
+__all__ = ["wordgen_excel2json", "wordgen_remodel_json", "wordgen_excel_verify", "Search_Module_List",
+           "Exclude_Module_Tuple"]
 
-Search_Module_List = ["CBUTTON", "WDT", "IR"]
+Search_Module_List = None
 Exclude_Module_Tuple = ("SysAddrMapping", "AP Peripheral AddrMapping", "CP Peripheral AddrMapping", "PDM2PCM")
 
 Register_KeyCell_Column = {"SubAddr": None, "StartBit": None, "EndBit": None, "Default": None, "Property": None,
@@ -176,9 +180,58 @@ def wordgen_remodel_json():
         logging.info("Regenerate __ex2js.remodel.json file")
 
 
+def wordgen_excel_verify(wb, amend=False):
+    global Register_KeyCell_Column, Search_Module_List, Exclude_Module_Tuple
+    temp_name = ""
+    xlu = copy(wb)
+    xlu_sheet = None
+
+    for i in range(wb.nsheets):
+        # reset
+        Register_KeyCell_Column = {"SubAddr": None, "StartBit": None, "EndBit": None, "Default": None, "Property": None,
+                                   "RegisterName": None, "Description": None, "Alias": None}
+        sh = wb.sheet_by_index(i)
+        xlu_sheet = xlu.get_sheet(i)
+        if Search_Module_List:
+            if sh.name in Search_Module_List:
+                pass
+            else:
+                continue
+
+        if sh.name in Exclude_Module_Tuple:
+            continue
+
+        if wordgen_keycell_locate(sh):
+            for r in range(1, sh.nrows):
+                temp_name = alias_or_name(sh, Register_KeyCell_Column, r)
+                # ^[a-zA-Z_][a-zA-Z0-9_]*$
+                if re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", temp_name):
+                    pass
+                else:
+                    logging.warning("%s sheet, row: %s, column: %s      Error string: %s" % (sh.name, r+1,
+                                                                                             Register_KeyCell_Column
+                                                                                             ["RegisterName"],
+                                                                                             temp_name))
+                    if amend:
+                        if temp_name:
+                            temp_name = re.sub(r"[\[|<][a-zA-Z0-9_:]+?[>|\]]", "", temp_name.strip())
+                        else:
+                            temp_name = "Empty%d" % random.randint(1, 100000)
+
+                        logging.warning(temp_name)
+                        if not Register_KeyCell_Column["Alias"]:
+                            xlu_sheet.write(0, sh.ncols, "Alias")
+
+                        xlu_sheet.write(r, sh.ncols, temp_name)
+
+        else:
+            continue
+
+    xlu.save(os.path.join(os.getcwd(), "__info", "Venus_SoC_Memory_Mapping.xls"))
+
+
 if __name__ == "__main__":
-    wb = xlrd.open_workbook("../__info/Venus_SoC_Memory_Mapping.xls")
+    wb = xlrd.open_workbook("../__info/Venus_SoC_Memory_Mapping.xls",formatting_info=True)
     logging.debug("Word sheet number: %d" % int(wb.nsheets))
 
-    wordgen_excel2json(wb)
-    wordgen_remodel_json()
+    wordgen_excel_verify(wb, True)

@@ -11,18 +11,22 @@ if __name__ == "__main__":
                                                  "\r\n作者： EASON WANG",
                                      epilog="eg: --update --generate,\r\n 尽量不要使用 include和exclude参数",
                                      formatter_class=argparse.RawTextHelpFormatter)
+
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--generate", "-g", action="store_true")
     group.add_argument("--update", "-u", action="store_true")
+    group.add_argument("--verify", "-v", action="store_true")
 
     parser.add_argument("--include", "-i", nargs="+", type=str)
     parser.add_argument("--exclude", "-e", nargs="+", type=str)
     parser.add_argument("--version", action="version", version="%%(prog)s %s" % WordGen.WORDGEN_VERSION)
 
-    args = parser.parse_args("--version".split())
+    args = parser.parse_args("--verify".split())
     print(args)
 
     if args.generate:
         WordGen.generate_template(args.include, args.exclude)
     elif args.update:
         WordGen.update_template(args.include, args.exclude)
+    elif args.verify:
+        WordGen.excel_content_verify(args.include, args.exclude)

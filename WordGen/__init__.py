@@ -5,7 +5,8 @@ from docx import Document
 from docxtpl import DocxTemplate
 from . import (Excel2Json, Json2Temp, Temp2Word)
 
-__all__ = ["generate_template", "update_template", "WORDGEN_VERSION", "WORDGEN_XLS_PATH_LIST", "WORDGEN_TPL_PATH_LIST"]
+__all__ = ["generate_template", "update_template", "WORDGEN_VERSION", "WORDGEN_XLS_PATH_LIST", "WORDGEN_TPL_PATH_LIST",
+           "excel_content_verify"]
 
 WORDGEN_VERSION = "1.0"
 __version__ = WORDGEN_VERSION
@@ -50,3 +51,16 @@ def update_template(search_sheet=None, exclude_sheet=None):
 
     tpl = DocxTemplate(os.path.join(os.getcwd(), ".Template", "WordGen.docx"))
     Temp2Word.wordgen_temp2word(tpl)
+
+
+def excel_content_verify(search_sheet=None, exclude_sheet=None):
+    if search_sheet:
+        Excel2Json.Search_Module_List = search_sheet
+
+    if exclude_sheet:
+        Excel2Json.Exclude_Module_Tuple = exclude_sheet
+
+    wb = xlrd.open_workbook(os.path.join(os.getcwd(), "__info", "Venus_SoC_Memory_Mapping.xls"), formatting_info=True)
+    logging.debug("Word sheet number: %d" % int(wb.nsheets))
+
+    Excel2Json.wordgen_excel_verify(wb, True)
