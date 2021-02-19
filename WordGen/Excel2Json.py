@@ -1,10 +1,11 @@
 import xlrd
 import logging
 import json
+import os
 
 __all__ = ["wordgen_excel2json", "wordgen_remodel_json"]
 
-Search_Module_List = ["CBUTTON"]
+Search_Module_List = ["CBUTTON", "WDT", "IR"]
 Exclude_Module_Tuple = ("SysAddrMapping", "AP Peripheral AddrMapping", "CP Peripheral AddrMapping", "PDM2PCM")
 
 Register_KeyCell_Column = {"SubAddr": None, "StartBit": None, "EndBit": None, "Default": None, "Property": None,
@@ -129,14 +130,15 @@ def wordgen_excel2json(wb):
         else:
             continue
 
-    with open("__info/ex2js.json", "w") as fw:
+    with open(os.path.join(os.getcwd(), "__info", "ex2js.json"), "w") as fw:
         json.dump(WordGen_List, fw)
+        logging.info("Regenerate ex2js.json file")
 
 
 def wordgen_remodel_json():
     remodel_dict = {"Module_Register_Col_Labels": ['Name', 'Bit', 'Type', 'Description', 'Reset']}
 
-    with open("__info/ex2js.json", "r") as fr:
+    with open(os.path.join(os.getcwd(), "__info", "ex2js.json"), "r") as fr:
         handle = json.load(fr)
 
     for item in handle:
@@ -169,8 +171,9 @@ def wordgen_remodel_json():
             str_key = "%s_%s_contents" % (item["module"], in_item["register"])
             remodel_dict.update({str_key: reg_list})
 
-    with open("__info/__ex2js.remodel.json", "w") as fw:
+    with open(os.path.join(os.getcwd(), "__info", "__ex2js.remodel.json"), "w") as fw:
         json.dump(remodel_dict, fw)
+        logging.info("Regenerate __ex2js.remodel.json file")
 
 
 if __name__ == "__main__":

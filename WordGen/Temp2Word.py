@@ -1,15 +1,18 @@
-from docxtpl import DocxTemplate
 import json
+import os
+import logging
 
 
-def wordgen_temp2word():
-    tpl = DocxTemplate("../.Template/WordGen.docx")
-    with open("../__info/__ex2js.remodel.json", "r") as fr:
+def wordgen_temp2word(tpl):
+    with open(os.path.join(os.getcwd(), "__info", "__ex2js.remodel.json"), "r") as fr:
         handle = json.load(fr)
+        logging.debug("Read __ex2js.remodel.json file")
 
+    logging.info("Start render template")
     tpl.render(handle)
+    logging.info("End render")
 
-    tpl.save("../ListenAI_Doc.docx")
+    tpl.save(os.path.join(os.getcwd(), "ListenAI_Doc.docx"))
 
 
 if __name__ == "__main__":

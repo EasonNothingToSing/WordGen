@@ -1,10 +1,28 @@
-import xlrd
-import WordGen.Excel2Json as e2j
+import WordGen
+import argparse
 
-print(dir())
 
 if __name__ == "__main__":
-    wb = xlrd.open_workbook("__info/Venus_SoC_Memory_Mapping.xls")
+    parser = argparse.ArgumentParser(prog="WordGen",
+                                     description="介绍： ListenAI 旗下 chipsky 的专用文档生成器，"
+                                                 "根据IC生成的XLS文件，生成模板，再由模板渲染成最终文档."
+                                                 "\r\n局限性： XLS文件中关键字发生改变的时候，"
+                                                 "会导致模板发生变化，从而无法对原有模板进行渲染."
+                                                 "\r\n作者： EASON WANG",
+                                     epilog="eg: --update --generate,\r\n 尽量不要使用 include和exclude参数",
+                                     formatter_class=argparse.RawTextHelpFormatter)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--generate", "-g", action="store_true")
+    group.add_argument("--update", "-u", action="store_true")
 
-    e2j.wordgen_excel2json(wb)
-    e2j.wordgen_remodel_json()
+    parser.add_argument("--include", "-i", nargs="+", type=str)
+    parser.add_argument("--exclude", "-e", nargs="+", type=str)
+    parser.add_argument("--version", action="version", version="%%(prog)s %s" % WordGen.WORDGEN_VERSION)
+
+    args = parser.parse_args("--version".split())
+    print(args)
+
+    if args.generate:
+        WordGen.generate_template(args.include, args.exclude)
+    elif args.update:
+        WordGen.update_template(args.include, args.exclude)

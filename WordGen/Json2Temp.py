@@ -1,11 +1,12 @@
 from docx import Document
 import json
+import os
 
 __all__ = ["wordgen_json2temp"]
 
 
 def wordgen_json2temp(doc):
-    with open("../__info/ex2js.json", "r") as fr:
+    with open(os.path.join(os.getcwd(), "__info", "ex2js.json"), "r") as fr:
         handle = json.load(fr)
 
     for item in handle:
