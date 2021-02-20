@@ -1,4 +1,5 @@
 from docx import Document
+import logging
 import json
 import os
 
@@ -9,6 +10,7 @@ def wordgen_json2temp(doc):
     with open(os.path.join(os.getcwd(), "__info", "ex2js.json"), "r") as fr:
         handle = json.load(fr)
 
+    logging.info("Generate template...")
     for item in handle:
         jinjia_key = "{{ %s_Name }}" % item["module"]
         doc.add_heading(jinjia_key, level=2)
@@ -45,6 +47,8 @@ def wordgen_json2temp(doc):
             table.cell(2, 1).text = "{{ col }}"
             table.cell(2, 2).text = "{%tc endfor %}"
             table.cell(3, 0).text = "{%tr endfor %}"
+
+    logging.info("Generate complete")
 
 
 if __name__ == "__main__":

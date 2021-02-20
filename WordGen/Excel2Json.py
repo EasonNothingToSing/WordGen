@@ -180,11 +180,15 @@ def wordgen_remodel_json():
         logging.info("Regenerate __ex2js.remodel.json file")
 
 
+# xlwt API无法直接读取cell的值或者style，所以才用内置static 函数
+def __getcell_style(sheet, r, c):
+    global Register_KeyCell_Column
+    return sheet._Worksheet__rows.get(r)._Row__cells.get(c)
+
+
 def wordgen_excel_verify(wb, amend=False):
     global Register_KeyCell_Column, Search_Module_List, Exclude_Module_Tuple
-    temp_name = ""
     xlu = copy(wb)
-    xlu_sheet = None
 
     for i in range(wb.nsheets):
         # reset
@@ -201,10 +205,14 @@ def wordgen_excel_verify(wb, amend=False):
         if sh.name in Exclude_Module_Tuple:
             continue
 
+        # 定位关键字
         if wordgen_keycell_locate(sh):
+
             for r in range(1, sh.nrows):
+                style = __getcell_style(xlu_sheet, r, 0).xf_idx
+
                 temp_name = alias_or_name(sh, Register_KeyCell_Column, r)
-                # ^[a-zA-Z_][a-zA-Z0-9_]*$
+
                 if re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", temp_name):
                     pass
                 else:
@@ -213,25 +221,30 @@ def wordgen_excel_verify(wb, amend=False):
                                                                                              ["RegisterName"],
                                                                                              temp_name))
                     if amend:
+                        # 如果为非空格
                         if temp_name:
+                            # 将异常命名中的错误去除
                             temp_name = re.sub(r"[\[|<][a-zA-Z0-9_:]+?[>|\]]", "", temp_name.strip())
                         else:
                             temp_name = "Empty%d" % random.randint(1, 100000)
 
-                        logging.warning(temp_name)
+                        logging.warning("Change to %s" % temp_name)
+
+                        # 如果检测出“Alias”为空
                         if not Register_KeyCell_Column["Alias"]:
+                            # 在最后一列右侧添加一列
                             xlu_sheet.write(0, sh.ncols, "Alias")
+                            __getcell_style(xlu_sheet, 0, sh.ncols).xf_idx = style
 
-                        xlu_sheet.write(r, sh.ncols, temp_name)
+                        xlu_sheet.write(r, Register_KeyCell_Column["Alias"] or sh.ncols, temp_name)
+                        __getcell_style(xlu_sheet, r, Register_KeyCell_Column["Alias"] or sh.ncols).xf_idx = style
 
-        else:
-            continue
-
+    # 保存结果（将原有一份excel备份后再保存）
     xlu.save(os.path.join(os.getcwd(), "__info", "Venus_SoC_Memory_Mapping.xls"))
 
 
 if __name__ == "__main__":
-    wb = xlrd.open_workbook("../__info/Venus_SoC_Memory_Mapping.xls",formatting_info=True)
+    wb = xlrd.open_workbook("../__info/Venus_SoC_Memory_Mapping.xls", formatting_info=True)
     logging.debug("Word sheet number: %d" % int(wb.nsheets))
 
     wordgen_excel_verify(wb, True)

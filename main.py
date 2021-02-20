@@ -21,12 +21,14 @@ if __name__ == "__main__":
     parser.add_argument("--exclude", "-e", nargs="+", type=str)
     parser.add_argument("--version", action="version", version="%%(prog)s %s" % WordGen.WORDGEN_VERSION)
 
-    args = parser.parse_args("--verify".split())
-    print(args)
+    args = parser.parse_args("--update".split())
 
     if args.generate:
+        # 生成word模板
         WordGen.generate_template(args.include, args.exclude)
     elif args.update:
+        # 渲染word模板
         WordGen.update_template(args.include, args.exclude)
     elif args.verify:
+        # 检查excel文档是否命名正确
         WordGen.excel_content_verify(args.include, args.exclude)
