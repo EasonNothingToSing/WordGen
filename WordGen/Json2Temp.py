@@ -5,6 +5,8 @@ import os
 
 __all__ = ["wordgen_json2temp"]
 
+WORDGEN_TABLE_STYLE = "ListenAI_Table"
+
 
 def wordgen_json2temp(doc):
     with open(os.path.join(os.getcwd(), "__info", "ex2js.json"), "r") as fr:
@@ -27,7 +29,8 @@ def wordgen_json2temp(doc):
 
             # generate table
             # merge
-            table = doc.add_table(4, 3)
+            table = doc.add_table(4, 3, WORDGEN_TABLE_STYLE)
+            table.autofit = True
             a = table.rows[1].cells[0]
             b = table.rows[1].cells[2]
             a.merge(b)
