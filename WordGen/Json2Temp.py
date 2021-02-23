@@ -30,7 +30,6 @@ def wordgen_json2temp(doc):
             # generate table
             # merge
             table = doc.add_table(4, 3, WORDGEN_TABLE_STYLE)
-            table.autofit = True
             a = table.rows[1].cells[0]
             b = table.rows[1].cells[2]
             a.merge(b)

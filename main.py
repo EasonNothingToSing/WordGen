@@ -17,11 +17,14 @@ if __name__ == "__main__":
     group.add_argument("--update", "-u", action="store_true")
     group.add_argument("--verify", "-v", action="store_true")
 
+    parser.add_argument("--table_style", type=str)
+    parser.add_argument("--table_header_style", type=str)
+    parser.add_argument("--table_content_style", type=str)
     parser.add_argument("--include", "-i", nargs="+", type=str)
     parser.add_argument("--exclude", "-e", nargs="+", type=str)
     parser.add_argument("--version", action="version", version="%%(prog)s %s" % WordGen.WORDGEN_VERSION)
 
-    args = parser.parse_args("--update".split())
+    args = parser.parse_args()
 
     if args.generate:
         # 生成word模板

@@ -8,7 +8,7 @@ from . import (Excel2Json, Json2Temp, Temp2Word)
 __all__ = ["generate_template", "update_template", "WORDGEN_VERSION", "WORDGEN_XLS_PATH_LIST", "WORDGEN_TPL_PATH_LIST",
            "excel_content_verify"]
 
-WORDGEN_VERSION = "1.0"
+WORDGEN_VERSION = "1.1"
 __version__ = WORDGEN_VERSION
 
 WORDGEN_ACTION_CHOICES = ["generate", "update"]
