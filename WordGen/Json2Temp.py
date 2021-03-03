@@ -5,6 +5,11 @@ import os
 
 __all__ = ["wordgen_json2temp"]
 
+WORDGEN_TEMPLATE_HEADING = ({"Name": "Introduction", "Level": 2, "Children": None},
+                            {"Name": "Main Features", "Level": 2, "Children": None},
+                            {"Name": "Function Description", "Level": 2, "Children": None},
+                            {"Name": "Basic Block Diagram", "Level": 2, "Children": None})
+
 WORDGEN_TABLE_STYLE = "ListenAI_Table"
 
 
@@ -13,8 +18,15 @@ def wordgen_json2temp(doc):
         handle = json.load(fr)
 
     logging.info("Generate template...")
+
     for item in handle:
         jinjia_key = "{{ %s_Name }}" % item["module"]
+        doc.add_heading(jinjia_key, level=1)
+
+        for item_h in WORDGEN_TEMPLATE_HEADING:
+            doc.add_heading(item_h["Name"], level=item_h["Level"])
+
+        jinjia_key = "{{ %s_Name }} %s" % (item["module"], "Register")
         doc.add_heading(jinjia_key, level=2)
 
         # jinjia_key = "{{ %s_Address}}" %  item["module"]
@@ -49,6 +61,7 @@ def wordgen_json2temp(doc):
             table.cell(2, 1).text = "{{ col }}"
             table.cell(2, 2).text = "{%tc endfor %}"
             table.cell(3, 0).text = "{%tr endfor %}"
+        doc.add_page_break()
 
     logging.info("Generate complete")
 
